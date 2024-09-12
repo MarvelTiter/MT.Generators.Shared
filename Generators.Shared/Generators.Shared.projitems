@@ -24,7 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\TypeBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TypeParameterInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
-    <Compile Include="..\Generators.Shared\RoslynExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RoslynExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)MT.Generators.props" />
