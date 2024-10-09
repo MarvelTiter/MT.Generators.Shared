@@ -150,6 +150,22 @@ internal static class RoslynExtensions
         }
     } 
 
+    /// <summary>
+    /// 获取属性符号
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public static IEnumerable<IPropertySymbol> GetProperties(this INamedTypeSymbol? symbol)
+    {
+        foreach (var item in symbol?.GetMembers() ?? [])
+        {
+            if (item.Kind == SymbolKind.Property && item is IPropertySymbol p)
+            {
+                yield return p;
+            }
+        }
+    }
+
     public static bool CheckDisableGenerator(this AnalyzerConfigOptionsProvider options, string key)
     {
         return options.GlobalOptions.TryGetValue($"build_property.{key}", out var value) && !string.IsNullOrEmpty(value);
@@ -219,20 +235,6 @@ internal static class RoslynExtensions
 
     public static IEnumerable<INamedTypeSymbol> GetAllSymbols(this Compilation compilation, string fullName)
     {
-        //var mainAsm = compilation.SourceModule.ContainingAssembly;
-        //var refAsmSymbols = compilation.SourceModule.ReferencedAssemblySymbols;
-
-        //foreach (var asm in refAsmSymbols.Concat([mainAsm]))
-        //{
-        //    if (IsSystemType(asm))
-        //    {
-        //        continue;
-        //    }
-        //    foreach (var item in GetAllSymbols(asm.GlobalNamespace))
-        //    {
-        //        yield return item;
-        //    }
-        //}
         return InternalGetAllSymbols(compilation.GlobalNamespace);
 
         IEnumerable<INamedTypeSymbol> InternalGetAllSymbols(INamespaceSymbol global)
