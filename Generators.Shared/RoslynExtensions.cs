@@ -141,14 +141,14 @@ internal static class RoslynExtensions
     /// <returns></returns>
     public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol)
     {
-        foreach(var item in symbol?.GetMembers() ?? [])
+        foreach (var item in symbol?.GetMembers() ?? [])
         {
             if (item.Kind == SymbolKind.Method && item is IMethodSymbol method)
             {
                 yield return method;
             }
         }
-    } 
+    }
 
     /// <summary>
     /// 获取属性符号
@@ -319,6 +319,42 @@ internal static class RoslynExtensions
                 var method = m.IsGenericType ? item.ConstructedFrom : item;
                 yield return (method, a);
             }
+        }
+    }
+    /// <summary>
+    /// 获取直接继承的接口列表
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public static IEnumerable<INamedTypeSymbol> GetInterfaces(this ITypeSymbol symbol)
+    {
+        if (symbol.AllInterfaces.Length == 0) yield break;
+        if (symbol.AllInterfaces.Length == 1)
+        {
+            yield return symbol.AllInterfaces[0];
+            yield break;
+        }
+        yield return symbol.AllInterfaces[0];
+        for (int i = 1; i < symbol.AllInterfaces.Length; i++)
+        {
+            var iface = symbol.AllInterfaces[i];
+            if (!InheriBefore(iface, symbol, i))
+            {
+                yield return iface;
+            }
+        }
+
+        static bool InheriBefore(INamedTypeSymbol target, ITypeSymbol owner, int last)
+        {
+            for (int i = 0; i < last; i++)
+            {
+                var iface = owner.AllInterfaces[i];
+                if (iface.AllInterfaces.Contains(target))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
