@@ -297,7 +297,7 @@ internal static class RoslynExtensions
 
     public static IEnumerable<(IMethodSymbol Symbol, AttributeData? AttrData)> GetAllMethodWithAttribute(this INamedTypeSymbol interfaceSymbol, string fullName, INamedTypeSymbol? classSymbol = null)
     {
-        var all = interfaceSymbol.Interfaces.Insert(0, interfaceSymbol);
+        var all = interfaceSymbol.AllInterfaces.Insert(0, interfaceSymbol);
         foreach (var m in all)
         {
             foreach (var item in m.GetMembers().Where(m => m is IMethodSymbol).Cast<IMethodSymbol>())
