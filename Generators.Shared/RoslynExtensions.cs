@@ -328,16 +328,17 @@ internal static class RoslynExtensions
     /// <returns></returns>
     public static IEnumerable<INamedTypeSymbol> GetInterfaces(this ITypeSymbol symbol)
     {
-        if (symbol.AllInterfaces.Length == 0) yield break;
-        if (symbol.AllInterfaces.Length == 1)
+        var dis = symbol.Interfaces;
+        if (dis.Length == 0) yield break;
+        if (dis.Length == 1)
         {
-            yield return symbol.AllInterfaces[0];
+            yield return dis[0];
             yield break;
         }
-        yield return symbol.AllInterfaces[0];
-        for (int i = 1; i < symbol.AllInterfaces.Length; i++)
+        yield return dis[0];
+        for (int i = 1; i < dis.Length; i++)
         {
-            var iface = symbol.AllInterfaces[i];
+            var iface = dis[i];
             if (!InheriBefore(iface, symbol, i))
             {
                 yield return iface;
@@ -348,8 +349,8 @@ internal static class RoslynExtensions
         {
             for (int i = 0; i < last; i++)
             {
-                var iface = owner.AllInterfaces[i];
-                if (iface.AllInterfaces.Contains(target))
+                var iface = owner.Interfaces[i];
+                if (iface.Interfaces.Contains(target))
                 {
                     return true;
                 }
