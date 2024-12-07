@@ -257,10 +257,13 @@ internal static class RoslynExtensions
             }
         }
 
+/*
         bool IsSystemType(ISymbol symbol)
         {
-            return symbol.Name == "System" || symbol.Name.Contains("System.") || symbol.Name.Contains("Microsoft.");
+            var fullQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return fullQualifiedName.StartsWith("global::System.") || fullQualifiedName.StartsWith("Microsoft.");
         }
+*/
 
     }
 
