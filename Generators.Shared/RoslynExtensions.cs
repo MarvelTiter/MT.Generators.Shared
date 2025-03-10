@@ -141,14 +141,14 @@ internal static class RoslynExtensions
     /// <returns></returns>
     public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol)
     {
-        foreach(var item in symbol?.GetMembers() ?? [])
+        foreach (var item in symbol?.GetMembers() ?? [])
         {
             if (item.Kind == SymbolKind.Method && item is IMethodSymbol method)
             {
                 yield return method;
             }
         }
-    } 
+    }
 
     /// <summary>
     /// 获取属性符号
@@ -297,7 +297,7 @@ internal static class RoslynExtensions
 
     public static IEnumerable<(IMethodSymbol Symbol, AttributeData? AttrData)> GetAllMethodWithAttribute(this INamedTypeSymbol interfaceSymbol, string fullName, INamedTypeSymbol? classSymbol = null)
     {
-        var all = interfaceSymbol.Interfaces.Insert(0, interfaceSymbol);
+        var all = interfaceSymbol.AllInterfaces.Insert(0, interfaceSymbol);
         foreach (var m in all)
         {
             foreach (var item in m.GetMembers().Where(m => m is IMethodSymbol).Cast<IMethodSymbol>())
@@ -319,6 +319,43 @@ internal static class RoslynExtensions
                 var method = m.IsGenericType ? item.ConstructedFrom : item;
                 yield return (method, a);
             }
+        }
+    }
+    /// <summary>
+    /// 获取直接继承的接口列表
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public static IEnumerable<INamedTypeSymbol> GetInterfaces(this ITypeSymbol symbol)
+    {
+        var dis = symbol.Interfaces;
+        if (dis.Length == 0) yield break;
+        if (dis.Length == 1)
+        {
+            yield return dis[0];
+            yield break;
+        }
+        yield return dis[0];
+        for (int i = 1; i < dis.Length; i++)
+        {
+            var iface = dis[i];
+            if (!InheriBefore(iface, symbol, i))
+            {
+                yield return iface;
+            }
+        }
+
+        static bool InheriBefore(INamedTypeSymbol target, ITypeSymbol owner, int last)
+        {
+            for (int i = 0; i < last; i++)
+            {
+                var iface = owner.Interfaces[i];
+                if (iface.Interfaces.Contains(target))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
