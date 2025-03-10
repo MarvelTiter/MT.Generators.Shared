@@ -124,16 +124,17 @@ $$"""
 internal class SwitchCaseStatement : Statement
 {
     public string? Condition { get; set; }
-    public string? Action { get; set; }
+    public List<Statement> Action { get; set; } = [];
     public bool IsBreak { get; set; }
     public override string ToString()
     {
+        Action.ForEach(a => a.IndentFixed = 1);
         if (IsBreak)
         {
             return
 $"""
 {Indent}    case {Condition}:
-{Indent}        {Action};
+{string.Join("\n", Action)}
 {Indent}        break;
 """;
         }
@@ -142,7 +143,7 @@ $"""
             return
 $"""
 {Indent}    case {Condition}:
-{Indent}        {Action};
+{string.Join("\n", Action)}
 """;
         }
     }
@@ -184,7 +185,7 @@ $$"""
 internal class LocalFunction : Statement
 {
     //public static LocalFunction Default(Node parent) => new LocalFunction() { Parent = parent };
-    public static LocalFunction Default => new LocalFunction() ;
+    public static LocalFunction Default => new LocalFunction();
     public string? ReturnType { get; set; }
     public string? Name { get; set; }
     public bool IsAsync { get; set; }
@@ -198,6 +199,23 @@ $$"""
 {{Indent}}{{Async}}{{ReturnType}} {{Name}}({{string.Join(", ", Parameters)}})
 {{Indent}}{
 {{string.Join("\n", Body)}}
+{{Indent}}}
+""";
+    }
+}
+
+internal class ForeachStatement : Statement
+{
+    public static ForeachStatement Default => new ForeachStatement();
+    public List<Statement> Contents { get; set; } = [];
+    public string? LoopContent { get; set; }
+    public override string ToString()
+    {
+        return
+$$"""
+{{Indent}}foreach({{LoopContent}})
+{{Indent}}{
+{{string.Join("\n", Contents)}}
 {{Indent}}}
 """;
     }

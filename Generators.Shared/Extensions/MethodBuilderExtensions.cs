@@ -89,15 +89,33 @@ internal static class MethodBuilderExtensions
 
     public static SwitchStatement AddReturnCase(this SwitchStatement switchStatement, string condition, string returnItem)
     {
-        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = $"return {returnItem}", Parent = switchStatement.Parent });
+        Statement ret = $"return {returnItem}";
+        ret.Parent = switchStatement;
+        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = [ret], Parent = switchStatement.Parent });
         return switchStatement;
     }
 
-    public static SwitchStatement AddBreakCase(this SwitchStatement switchStatement, string condition, string action)
+    public static SwitchStatement AddReturnCase(this SwitchStatement switchStatement, string condition, params List<Statement> statements)
     {
+        statements.ForEach(s => s.Parent = switchStatement);
+        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = statements, Parent = switchStatement.Parent });
+        return switchStatement;
+    }
+
+    public static SwitchStatement AddBreakCase(this SwitchStatement switchStatement, string condition, Statement action)
+    {
+        action.Parent = switchStatement;
+        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = [action], IsBreak = true, Parent = switchStatement.Parent });
+        return switchStatement;
+    }
+
+    public static SwitchStatement AddBreakCase(this SwitchStatement switchStatement, string condition, params List<Statement> action)
+    {
+        action.ForEach(s => s.Parent = switchStatement);
         switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = action, IsBreak = true, Parent = switchStatement.Parent });
         return switchStatement;
     }
+
     public static SwitchStatement AddDefaultCase(this SwitchStatement switchStatement, string action)
     {
         switchStatement.DefaultCase = new DefaultCaseStatement { Action = action, Parent = switchStatement.Parent };
@@ -177,6 +195,23 @@ internal static class MethodBuilderExtensions
             localFunction.Body.Add(item);
         }
         return localFunction;
+    }
+
+    #endregion
+
+    #region foreach
+
+    public static ForeachStatement Foreach(this ForeachStatement builder, string loop)
+    {
+        builder.LoopContent = loop;
+        return builder;
+    }
+
+    public static ForeachStatement AddStatements(this ForeachStatement builder, params List<Statement> statements)
+    {
+        statements.ForEach(s => s.Parent = builder);
+        builder.Contents.AddRange(statements);
+        return builder;
     }
 
     #endregion

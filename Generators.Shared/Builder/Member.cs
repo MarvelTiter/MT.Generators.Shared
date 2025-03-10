@@ -10,7 +10,8 @@ internal abstract class Node
 
     public abstract NodeType Type { get; }
     public string Indent => new(' ', 4 * Level);
-    public virtual int Level => (Parent?.Level ?? -1) + 1;
+    public virtual int Level => (Parent?.Level ?? -1) + 1 + IndentFixed;
+    public int IndentFixed { get; set; }
     public Node? Parent
     {
         get
