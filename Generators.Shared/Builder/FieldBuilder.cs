@@ -12,11 +12,12 @@ internal class FieldBuilder : MemberBuilder<FieldBuilder>
     }
     public override NodeType Type => NodeType.Field;
     //public override string Indent => "        ";
+    string InitStatement => string.IsNullOrEmpty(Initialization) ? "" : $" = {Initialization}";
     public override string ToString()
     {
         var l = this.Level;
         return $"""
-            {Indent}{Modifiers} {MemberType} {Name};
+            {Indent}{Modifiers} {MemberType} {Name}{InitStatement};
             """;
     }
 }
