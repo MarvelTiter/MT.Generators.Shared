@@ -39,5 +39,10 @@ namespace Generators.Shared
                 {targetAttribute.ToDisplayString()}{(values.Count > 0 ? $"({paramString})" : "")}
                 """;
         }
+
+        public static void ForEach<T>(this T[] array, Action<T> action)
+        {
+            Array.ForEach(array, action);
+        }
     }
 }

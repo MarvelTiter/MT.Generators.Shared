@@ -3,6 +3,7 @@ using Generators.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Generators.Shared;
 
@@ -95,10 +96,10 @@ internal static class MethodBuilderExtensions
         return switchStatement;
     }
 
-    public static SwitchStatement AddReturnCase(this SwitchStatement switchStatement, string condition, params List<Statement> statements)
+    public static SwitchStatement AddReturnCase(this SwitchStatement switchStatement, string condition, params Statement[] statements)
     {
         statements.ForEach(s => s.Parent = switchStatement);
-        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = statements, Parent = switchStatement.Parent });
+        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = [.. statements], Parent = switchStatement.Parent });
         return switchStatement;
     }
 
@@ -109,10 +110,10 @@ internal static class MethodBuilderExtensions
         return switchStatement;
     }
 
-    public static SwitchStatement AddBreakCase(this SwitchStatement switchStatement, string condition, params List<Statement> action)
+    public static SwitchStatement AddBreakCase(this SwitchStatement switchStatement, string condition, params Statement[] action)
     {
         action.ForEach(s => s.Parent = switchStatement);
-        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = action, IsBreak = true, Parent = switchStatement.Parent });
+        switchStatement.SwitchCases.Add(new SwitchCaseStatement { Condition = condition, Action = [.. action], IsBreak = true, Parent = switchStatement.Parent });
         return switchStatement;
     }
 
@@ -207,7 +208,7 @@ internal static class MethodBuilderExtensions
         return builder;
     }
 
-    public static ForeachStatement AddStatements(this ForeachStatement builder, params List<Statement> statements)
+    public static ForeachStatement AddStatements(this ForeachStatement builder, params Statement[] statements)
     {
         statements.ForEach(s => s.Parent = builder);
         builder.Contents.AddRange(statements);
