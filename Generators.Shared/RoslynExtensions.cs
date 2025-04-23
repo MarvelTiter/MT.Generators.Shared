@@ -256,14 +256,28 @@ internal static class RoslynExtensions
                 }
             }
         }
-
-        bool IsSystemType(ISymbol symbol)
-        {
-            return symbol.Name == "System" || symbol.Name.Contains("System.") || symbol.Name.Contains("Microsoft.");
-        }
-
+        //bool IsSystemType(ISymbol symbol)
+        //{
+        //    return symbol.Name == "System" || symbol.Name.Contains("System.") || symbol.Name.Contains("Microsoft.");
+        //}
     }
 
+    public static IEnumerable<ISymbol> GetAllMembers(this INamedTypeSymbol symbol, Func<INamedTypeSymbol,bool> baseTypeCheck)
+    {
+        if (symbol.BaseType is not null 
+            && symbol.BaseType.SpecialType != SpecialType.System_Object
+            && baseTypeCheck.Invoke(symbol.BaseType))
+        {
+            foreach (var item in symbol.BaseType.GetAllMembers(baseTypeCheck))
+            {
+                yield return item;
+            }
+        }
+        foreach (var item in symbol.GetMembers())
+        {
+            yield return item;
+        }
+    }
 
     public static string FormatClassName(this INamedTypeSymbol symbol, bool full = false)
     {
