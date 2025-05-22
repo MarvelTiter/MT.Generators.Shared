@@ -91,9 +91,9 @@ internal static class RoslynExtensions
     /// <param name="fullName"></param>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static bool GetAttribute(this ISymbol? symbol, string fullName, out AttributeData? data)
+    public static bool GetAttribute(this ISymbol? symbol, string fullName, out AttributeData? data, bool isInherited = false)
     {
-        data = symbol?.GetAttributes().FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == fullName);
+        data = symbol?.GetAttributes(fullName, isInherited).FirstOrDefault();
         return data != null;
     }
     /// <summary>
@@ -103,11 +103,15 @@ internal static class RoslynExtensions
     /// <param name="fullName"></param>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static IEnumerable<AttributeData> GetAttributes(this ISymbol? symbol, string fullName)
+    public static IEnumerable<AttributeData> GetAttributes(this ISymbol? symbol, string fullName, bool isInherited = false)
     {
         foreach (var item in symbol?.GetAttributes() ?? [])
         {
             if (item.AttributeClass?.ToDisplayString() == fullName)
+            {
+                yield return item;
+            }
+            if (isInherited && CheckBaseAttribute(item.AttributeClass, fullName))
             {
                 yield return item;
             }
@@ -118,11 +122,41 @@ internal static class RoslynExtensions
     /// </summary>
     /// <param name="symbol"></param>
     /// <param name="fullName"></param>
-    /// <param name="data"></param>
+    /// <param name="isInherited">是否检查继承关系</param>
     /// <returns></returns>
-    public static bool HasAttribute(this ISymbol? symbol, string fullName)
+    public static bool HasAttribute(this ISymbol? symbol, string fullName, bool isInherited = false)
     {
-        return symbol?.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == fullName) == true;
+        foreach (var item in symbol?.GetAttributes() ?? [])
+        {
+            if (item.AttributeClass?.ToDisplayString() == fullName)
+            {
+                return true;
+            }
+            if (isInherited && CheckBaseAttribute(item.AttributeClass, fullName))
+            {
+                return true;
+            }
+        }
+        return false;
+        //return symbol?.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == fullName) == true;
+
+    }
+    static bool CheckBaseAttribute(INamedTypeSymbol? attributeType, string targetAttribute)
+    {
+        if (attributeType is null) return false;
+        if (attributeType.BaseType is null) return false;
+        var parent = attributeType.BaseType;
+        var parentType = parent?.ToDisplayString();
+        if (parentType == "System.Attribute")
+        {
+            return false;
+        }
+        if (parentType == targetAttribute)
+        {
+            return true;
+        }
+        return CheckBaseAttribute(parent?.BaseType, targetAttribute);
+        //return false;
     }
 
     public static bool HasInterface(this ITypeSymbol? symbol, string fullName)
@@ -233,17 +267,17 @@ internal static class RoslynExtensions
         return usings.Select(a => a.ToFullString().Replace("\n", "")).ToArray();
     }
 
-    public static IEnumerable<INamedTypeSymbol> GetAllSymbols(this Compilation compilation, string fullName)
+    public static IEnumerable<INamedTypeSymbol> GetAllSymbols(this Compilation compilation, string fullName, bool isInherited = false)
     {
-        return InternalGetAllSymbols(compilation.GlobalNamespace);
+        return InternalGetAllSymbols(compilation.GlobalNamespace, fullName, isInherited);
 
-        IEnumerable<INamedTypeSymbol> InternalGetAllSymbols(INamespaceSymbol global)
+        static IEnumerable<INamedTypeSymbol> InternalGetAllSymbols(INamespaceSymbol global, string targetAttribute, bool isInherited)
         {
             foreach (var symbol in global.GetMembers())
             {
                 if (symbol is INamespaceSymbol n)
                 {
-                    foreach (var item in InternalGetAllSymbols(n))
+                    foreach (var item in InternalGetAllSymbols(n, targetAttribute, isInherited))
                     {
                         //if (item.HasAttribute(AutoInject))
                         yield return item;
@@ -251,20 +285,23 @@ internal static class RoslynExtensions
                 }
                 else if (symbol is INamedTypeSymbol target)
                 {
-                    if (target.HasAttribute(fullName))
+                    if (target.HasAttribute(targetAttribute, isInherited))
                         yield return target;
                 }
             }
         }
-        //bool IsSystemType(ISymbol symbol)
-        //{
-        //    return symbol.Name == "System" || symbol.Name.Contains("System.") || symbol.Name.Contains("Microsoft.");
-        //}
     }
 
-    public static IEnumerable<ISymbol> GetAllMembers(this INamedTypeSymbol symbol, Func<INamedTypeSymbol,bool> baseTypeCheck)
+    public static Location? TryGetLocation(this ISymbol symbol)
     {
-        if (symbol.BaseType is not null 
+        var syntaxReference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
+        return syntaxReference?.GetSyntax()?.GetLocation()
+                            ?? symbol.Locations.FirstOrDefault();
+    }
+
+    public static IEnumerable<ISymbol> GetAllMembers(this INamedTypeSymbol symbol, Func<INamedTypeSymbol, bool> baseTypeCheck)
+    {
+        if (symbol.BaseType is not null
             && symbol.BaseType.SpecialType != SpecialType.System_Object
             && baseTypeCheck.Invoke(symbol.BaseType))
         {
@@ -399,6 +436,34 @@ internal static class RoslynExtensions
         //{
         //    yield return symbol;
         //}
+    }
+
+    public static (bool IsTask, bool HasReturn, ITypeSymbol ReturnType) GetReturnTypeInfo(this IMethodSymbol method)
+    {
+        var typeSymbol = method.ReturnType;
+        var isTask = IsTask(typeSymbol);
+        var hasReturn = HasReturn(isTask, typeSymbol) && !method.ReturnsVoid;
+        var returnType = GetRealReturnType(isTask, hasReturn, typeSymbol);
+        return (isTask, hasReturn, returnType);
+
+        static bool IsTask(ITypeSymbol t) => t is INamedTypeSymbol nt && nt.ConstructedFrom?.ToDisplayString()?.StartsWith("System.Threading.Tasks.Task") == true;
+        static bool HasReturn(bool isTask, ITypeSymbol t)
+        {
+            if (!isTask) return t.SpecialType != SpecialType.System_Void;
+            return t is INamedTypeSymbol nt && nt.IsGenericType;
+        }
+        static ITypeSymbol GetRealReturnType(bool isTask, bool hasReturn, ITypeSymbol t)
+        {
+            if (isTask)
+            {
+                // 具有异步返回值，说明返回 Task<T>，提取出T
+                if (hasReturn)
+                {
+                    return t.GetGenericTypes().FirstOrDefault();
+                }
+            }
+            return t;
+        }
     }
 
     public static IEnumerable<TypeParameterInfo> GetTypeParameters(this ISymbol symbol)
