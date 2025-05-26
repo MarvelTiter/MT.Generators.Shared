@@ -3,11 +3,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 
 namespace Generators.Shared;
 
@@ -465,6 +463,100 @@ internal static class RoslynExtensions
             return t;
         }
     }
+
+    /// <summary>
+    /// 判断两个方法的签名是否一致
+    /// </summary>
+    /// <param name="method"></param>
+    /// <param name="other"></param>
+    /// <returns></returns>
+    public static bool AreMethodsSignatureEqual(this IMethodSymbol method, IMethodSymbol other, bool checkReturnType = true)
+    {
+        // 快速引用比较
+        if (SymbolEqualityComparer.Default.Equals(method, other))
+            return true;
+
+        // 检查方法名
+        if (method.Name != other.Name)
+            return false;
+
+        // 检查返回类型
+        if (!SymbolEqualityComparer.Default.Equals(method.ReturnType, other.ReturnType) && checkReturnType)
+            return false;
+
+        // 检查参数
+        if (!AreParametersEqual(method.Parameters, other.Parameters))
+            return false;
+
+        // 检查泛型约束
+        if (!AreGenericConstraintsEqual(method, other))
+            return false;
+
+        return true;
+
+        
+
+        static bool AreParametersEqual(ImmutableArray<IParameterSymbol> params1, ImmutableArray<IParameterSymbol> params2)
+        {
+            if (params1.Length != params2.Length)
+                return false;
+
+            for (int i = 0; i < params1.Length; i++)
+            {
+                var param1 = params1[i];
+                var param2 = params2[i];
+
+                if (param1.RefKind != param2.RefKind ||
+                    param1.IsParams != param2.IsParams ||
+                    !SymbolEqualityComparer.Default.Equals(param1.Type, param2.Type) ||
+                    !AreParametersDefaultValuesEqual(param1, param2))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        static bool AreParametersDefaultValuesEqual(IParameterSymbol param1, IParameterSymbol param2)
+        {
+            if (param1.HasExplicitDefaultValue != param2.HasExplicitDefaultValue)
+                return false;
+
+            if (param1.HasExplicitDefaultValue)
+            {
+                if (!Equals(param1.ExplicitDefaultValue, param2.ExplicitDefaultValue))
+                    return false;
+            }
+            return true;
+        }
+
+        static bool AreGenericConstraintsEqual(IMethodSymbol method1, IMethodSymbol method2)
+        {
+            if (method1.TypeParameters.Length != method2.TypeParameters.Length)
+                return false;
+
+            for (int i = 0; i < method1.TypeParameters.Length; i++)
+            {
+                ITypeParameterSymbol typeParam1 = method1.TypeParameters[i];
+                ITypeParameterSymbol typeParam2 = method2.TypeParameters[i];
+
+                // 检查约束类型（如 where T : IComparable）
+                if (!ImmutableArrayExtensions.SequenceEqual(typeParam1.ConstraintTypes,
+                    typeParam2.ConstraintTypes, SymbolEqualityComparer.Default))
+                    return false;
+
+                // 检查特殊约束（如 class, struct, new()）
+                if (typeParam1.HasReferenceTypeConstraint != typeParam2.HasReferenceTypeConstraint ||
+                    typeParam1.HasValueTypeConstraint != typeParam2.HasValueTypeConstraint ||
+                    typeParam1.HasConstructorConstraint != typeParam2.HasConstructorConstraint)
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
 
     public static IEnumerable<TypeParameterInfo> GetTypeParameters(this ISymbol symbol)
     {

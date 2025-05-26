@@ -43,6 +43,12 @@ internal static class MethodBuilderExtensions
         builder.Body.Add(body);
         return builder;
     }
+    public static MethodBuilder ExplicitFor(this MethodBuilder builder, string interfaceType)
+    {
+        builder.IsExplicit = true;
+        builder.ExplicitType = interfaceType;
+        return builder;
+    }
 
     //public static T AddBody<T>(this T builder, params string[] body) where T : MethodBase
     //{
@@ -72,6 +78,8 @@ internal static class MethodBuilderExtensions
         }
         return builder;
     }
+
+
     #region switch
     public static T AddSwitchStatement<T>(this T builder, string switchValue, Action<SwitchStatement> action) where T : MethodBase
     {

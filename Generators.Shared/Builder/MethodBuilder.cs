@@ -17,20 +17,24 @@ internal class MethodBuilder : MethodBase<MethodBuilder>
     string Async => IsAsync ? " async " : " ";
     public string? ReturnType { get; set; } = "void";
     public string ConstructedMethodName => $"{Name}{Types}";
+    public bool IsExplicit { get; set; }
+    public string? ExplicitType { get; set; }
+    string? InternalModifiers => IsExplicit ? "" : Modifiers;
+    string? InternalExplicit => IsExplicit ? $"{ExplicitType}." : "";
     public override string ToString()
     {
         if (IsLambdaBody)
             return
 $$"""
 {{AttributeList}}
-{{Indent}}{{Modifiers}}{{Async}}{{ReturnType}} {{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
+{{Indent}}{{InternalModifiers}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
 {{Indent}}  => {{Body.FirstOrDefault()?.ToString().Trim()}}
 """;
         else
             return
 $$"""
 {{AttributeList}}
-{{Indent}}{{Modifiers}}{{Async}}{{ReturnType}} {{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
+{{Indent}}{{InternalModifiers}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
 {{Indent}}{
 {{string.Join("\n", Body)}}
 {{Indent}}}
