@@ -11,10 +11,17 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ClassBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\CodeFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\ConstructorBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\FieldBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\ForeachStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\IfStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\LocalFunction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Member.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\MethodBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\NamespaceBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\Statement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\SwitchStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\TryCatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TypeBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConstAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />

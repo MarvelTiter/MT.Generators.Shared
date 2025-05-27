@@ -297,7 +297,7 @@ internal static class RoslynExtensions
                             ?? symbol.Locations.FirstOrDefault();
     }
 
-    public static IEnumerable<ISymbol> GetAllMembers(this INamedTypeSymbol symbol, Func<INamedTypeSymbol, bool> baseTypeCheck)
+    public static IEnumerable<ISymbol> GetAllMembers(this ITypeSymbol symbol, Func<INamedTypeSymbol, bool> baseTypeCheck)
     {
         if (symbol.BaseType is not null
             && symbol.BaseType.SpecialType != SpecialType.System_Object

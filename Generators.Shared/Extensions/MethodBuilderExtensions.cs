@@ -224,4 +224,68 @@ internal static class MethodBuilderExtensions
     }
 
     #endregion
+
+    #region try-catch
+
+    public static T AddTryCatch<T>(this T builder, Action<TryCatch> action) where T : MethodBase
+    {
+        var trycatch = TryCatch.Default;
+        trycatch.Parent = builder;
+        action.Invoke(trycatch);
+        builder.AddBody(trycatch);
+        return builder;
+    }
+    
+    public static TryCatch AddBody(this TryCatch tryCatch, params Statement[] statements)
+    {
+        foreach (var item in statements)
+        {
+            item.Parent = tryCatch;
+            tryCatch.Body.Add(item);
+        }
+        return tryCatch;
+    }
+    public static TryCatch AddCatch(this TryCatch tryCatch, Action<TryCatchException> action)
+    {
+        var catchStatement = TryCatchException.Default;
+        catchStatement.Parent = tryCatch.Parent;
+        action.Invoke(catchStatement);
+        tryCatch.Catchs.Add(catchStatement);
+        return tryCatch;
+    }
+    public static TryCatch AddCatch(this TryCatch tryCatch, string? exception, params Statement[] statements)
+    {
+        var catchStatement = TryCatchException.Default;
+        catchStatement.Exception = exception;
+        catchStatement.Parent = tryCatch.Parent;
+        foreach (var item in statements)
+        {
+            item.Parent = catchStatement;
+            catchStatement.Body.Add(item);
+        }
+        tryCatch.Catchs.Add(catchStatement);
+        return tryCatch;
+    }
+
+    public static TryCatchException AddBody(this TryCatchException tce, params Statement[] statements)
+    {
+        foreach (var item in statements)
+        {
+            item.Parent = tce;
+            tce.Body.Add(item);
+        }
+        return tce;
+    }
+
+    public static TryCatch AddFinally(this TryCatch tryCatch, params Statement[] statements)
+    {
+        foreach (var item in statements)
+        {
+            item.Parent = tryCatch;
+            tryCatch.Finally.Add(item);
+        }
+        return tryCatch;
+    }
+
+    #endregion
 }
