@@ -32,23 +32,55 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
     public bool CanWrite { get; set; } = true;
     public override NodeType Type => NodeType.Property;
     //public override string Indent => "        ";
-    string Getter => CanRead ? " get;" : "";
-    string Setter => CanWrite ? " set;" : "";
+    public string? Getter { get; set; }
+    public string? Setter { get; set; }
     public bool IsLambdaBody { get; set; }
     string InitStatement => string.IsNullOrEmpty(Initialization) ? "" : $" = {Initialization};";
+    string FieldInit => string.IsNullOrEmpty(Initialization) ? ";" : $" = {Initialization};";
+    public bool Full { get; set; }
+    public string? FieldName { get; set; }
+    public List<Statement> GetBody { get; set; } = [];
+    public List<Statement> SetBody { get; set; } = [];
+
+    string Get => Getter ?? (CanWrite ? "get;" : "");
+    string Set => Setter ?? (CanWrite ? "set;" : "");
     public override string ToString()
     {
-        if (IsLambdaBody)
+        if (Full)
         {
             return $$"""
-                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} => {{Initialization}};
+                {{Indent}}private {{MemberType}} {{FieldName}}{{FieldInit}}
+                {{AttributeList}}
+                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}}
+                {{Indent}}{
+                {{Indent}}    get
+                {{Indent}}    {
+                {{string.Join("\n", GetBody)}}
+                {{Indent}}    }
+                {{Indent}}    set
+                {{Indent}}    {
+                {{string.Join("\n", SetBody)}} 
+                {{Indent}}    }
+                {{Indent}}}
                 """;
         }
         else
         {
-            return $$"""
-                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} {{{Getter}}{{Setter}} }{{InitStatement}}
+
+            if (IsLambdaBody)
+            {
+                return $$"""
+                {{AttributeList}}
+                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} => {{Initialization}};
                 """;
+            }
+            else
+            {
+                return $$"""
+                {{AttributeList}}
+                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} { {{Get}} {{Set}} }{{InitStatement}}
+                """;
+            }
         }
     }
 }

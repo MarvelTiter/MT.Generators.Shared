@@ -15,6 +15,7 @@ internal enum NodeType
     Field,
     Property,
     Method,
+    Event,
     Statement
 }
 internal enum MemberType
@@ -51,6 +52,10 @@ internal class ClassBuilder : MemberBuilder<ClassBuilder>
     private IEnumerable<string> RenderMembers()
     {
         foreach (var m in Members.Where(m => m.Type == NodeType.Field))
+        {
+            yield return $"{m}";
+        }
+        foreach (var m in Members.Where(m => m.Type == NodeType.Event))
         {
             yield return $"{m}";
         }
