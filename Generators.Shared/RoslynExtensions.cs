@@ -465,6 +465,13 @@ internal static class RoslynExtensions
     }
 
     /// <summary>
+    /// new xxx()
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public static string New(this ITypeSymbol symbol) => $"new {symbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}()";
+
+    /// <summary>
     /// 判断两个方法的签名是否一致
     /// </summary>
     /// <param name="method"></param>

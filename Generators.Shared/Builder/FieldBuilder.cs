@@ -42,7 +42,7 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
     public List<Statement> GetBody { get; set; } = [];
     public List<Statement> SetBody { get; set; } = [];
 
-    string Get => Getter ?? (CanWrite ? "get;" : "");
+    string Get => Getter ?? (CanRead ? "get;" : "");
     string Set => Setter ?? (CanWrite ? "set;" : "");
     public override string ToString()
     {
