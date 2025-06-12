@@ -30,4 +30,17 @@ internal static class ClassBuilderExtensions
         }
         return builder;
     }
+
+    public static ClassBuilder InterfaceIf(this ClassBuilder builder, bool condition, params string[] interfaces)
+    {
+        if (!condition)
+        {
+            return builder;
+        }
+        foreach (var i in interfaces)
+        {
+            builder.Interfaces.Add(i);
+        }
+        return builder;
+    }
 }

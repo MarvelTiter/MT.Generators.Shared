@@ -1,6 +1,7 @@
 ﻿using Generators.Shared.Builder;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Linq;
 
 namespace Generators.Shared;
 
@@ -31,6 +32,21 @@ internal static class TypeBuilderExtensions
         foreach (var attr in attributes)
         {
             builder.Attributes.Add(attr);
+        }
+        return builder;
+    }
+
+    public static T Attribute<T>(this T builder, string attribute, params (string Name, string? Value)[] parameters)
+        where T : MemberBuilder
+    {
+        var ps = parameters.Where(p => p.Value is not null).ToArray();
+        if (ps.Length == 0)
+        {
+            builder.Attributes.Add(attribute);
+        }
+        else
+        {
+            builder.Attributes.Add($"{attribute}({string.Join(", ", ps.Select(p => $"{p.Name} = {p.Value}"))})");
         }
         return builder;
     }
