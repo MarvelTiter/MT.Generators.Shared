@@ -1,4 +1,5 @@
-﻿using Generators.Shared.Builder;
+﻿using Generators.Models;
+using Generators.Shared.Builder;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -78,9 +79,28 @@ internal static class TypeBuilderExtensions
         builder.MemberType = type;
         return builder;
     }
+    public static FieldBuilder MemberType(this FieldBuilder builder, string type, params TypeParameterInfo[] typeParameters)
+    {
+        if (typeParameters.Length > 0)
+        {
+            type = $"{type}<{string.Join(", ", typeParameters.Select(tp => tp.Name))}>";
+        }
+        builder.MemberType = type;
+        return builder;
+    }
 
     public static PropertyBuilder MemberType(this PropertyBuilder builder, string type)
     {
+        builder.MemberType = type;
+        return builder;
+    }
+
+    public static PropertyBuilder MemberType(this PropertyBuilder builder, string type, params TypeParameterInfo[] typeParameters)
+    {
+        if (typeParameters.Length > 0)
+        {
+            type = $"{type}<{string.Join(", ", typeParameters.Select(tp => tp.Name))}>";
+        }
         builder.MemberType = type;
         return builder;
     }
