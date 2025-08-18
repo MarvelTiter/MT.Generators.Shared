@@ -20,8 +20,22 @@ internal static class RoslynExtensions
     public static object? GetNamedValue(this AttributeData? a, string key)
     {
         if (a == null) return null;
-        var named = a.NamedArguments.FirstOrDefault(t => t.Key == key);
-        return named.Value.Value;
+        var namedValue = a.NamedArguments.FirstOrDefault(t => t.Key == key).Value;
+        if (namedValue.IsNull) return null;
+        return namedValue.Value;
+    }
+    /// <summary>
+    /// 获取指定了名称的参数的值
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public static object?[] GetNamedValues(this AttributeData? a, string key)
+    {
+        if (a == null) return [];
+        var namedValue = a.NamedArguments.FirstOrDefault(t => t.Key == key).Value;
+        if (namedValue.IsNull) return [];
+        return [.. namedValue.Values.Select(v => v.Value)];
     }
     /// <summary>
     /// 获取指定了名称的参数的值
@@ -79,7 +93,7 @@ internal static class RoslynExtensions
             values = [];
             return false;
         }
-        values = a.ConstructorArguments[index].Values.Select(v => v.Value).ToArray();
+        values = [.. a.ConstructorArguments[index].Values.Select(v => v.Value)];
         return true;
     }
     /// <summary>
