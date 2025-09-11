@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ConstAttributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ClassBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CompilationProviderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MethodBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\NameSpaceBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\PropertyBuilderExtensions.cs" />

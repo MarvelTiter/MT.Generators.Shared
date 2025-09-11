@@ -22,6 +22,8 @@ internal class Statement : Node
 
     private string AttachSemicolon()
     {
+        if (string.IsNullOrWhiteSpace(Content))
+            return string.Empty;
         if (Content.Trim().EndsWith(";"))
             return string.Empty;
         if (Content.StartsWith("if"))
@@ -29,6 +31,10 @@ internal class Statement : Node
         if (Content.StartsWith("{"))
             return string.Empty;
         if (Content.EndsWith("}"))
+            return string.Empty;
+        if (Content.StartsWith("#"))
+            return string.Empty;
+        if (Content.StartsWith("//"))
             return string.Empty;
         return ";";
 
