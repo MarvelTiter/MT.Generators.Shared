@@ -185,11 +185,14 @@ internal static class RoslynExtensions
     /// </summary>
     /// <param name="symbol"></param>
     /// <returns></returns>
-    public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol)
+    public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol, Func<IMethodSymbol, bool>? predicate = null)
     {
+        predicate ??= _ => true;
         foreach (var item in symbol?.GetMembers() ?? [])
         {
-            if (item.Kind == SymbolKind.Method && item is IMethodSymbol method)
+            if (item.Kind == SymbolKind.Method
+                && item is IMethodSymbol method
+                && predicate(method))
             {
                 yield return method;
             }
@@ -515,7 +518,7 @@ internal static class RoslynExtensions
 
         return true;
 
-        
+
 
         static bool AreParametersEqual(ImmutableArray<IParameterSymbol> params1, ImmutableArray<IParameterSymbol> params2)
         {

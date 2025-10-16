@@ -77,4 +77,11 @@ internal static class PropertyBuilderExtensions
         builder.Setter = $"set => {body}{(body.EndsWith(";") ? "" : ";")}";
         return builder;
     }
+
+    public static PropertyBuilder ExplicitFor(this PropertyBuilder builder, string interfaceType)
+    {
+        builder.IsExplicit = true;
+        builder.ExplicitType = interfaceType;
+        return builder;
+    }
 }

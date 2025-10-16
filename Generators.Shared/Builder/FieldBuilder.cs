@@ -39,11 +39,15 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
     string FieldInit => string.IsNullOrEmpty(Initialization) ? ";" : $" = {Initialization};";
     public bool Full { get; set; }
     public string? FieldName { get; set; }
+    public bool IsExplicit { get; set; }
+    public string? ExplicitType { get; set; }
     public List<Statement> GetBody { get; set; } = [];
     public List<Statement> SetBody { get; set; } = [];
 
     string Get => Getter ?? (CanRead ? "get;" : "");
     string Set => Setter ?? (CanWrite ? "set;" : "");
+    string? InternalModifiers => IsExplicit ? "" : Modifiers;
+    string? InternalExplicit => IsExplicit ? $"{ExplicitType}." : "";
     public override string ToString()
     {
         if (Full)
@@ -51,7 +55,7 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
             return $$"""
                 {{Indent}}private {{MemberType}} {{FieldName}}{{FieldInit}}
                 {{AttributeList}}
-                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}}
+                {{Indent}}{{InternalModifiers}} {{MemberType}} {{InternalExplicit}}{{Name}}
                 {{Indent}}{
                 {{Indent}}    get
                 {{Indent}}    {
@@ -71,14 +75,14 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
             {
                 return $$"""
                 {{AttributeList}}
-                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} => {{Initialization}};
+                {{Indent}}{{InternalModifiers}} {{MemberType}} {{InternalExplicit}}{{Name}} => {{Initialization}};
                 """;
             }
             else
             {
                 return $$"""
                 {{AttributeList}}
-                {{Indent}}{{Modifiers}} {{MemberType}} {{Name}} { {{Get}} {{Set}} }{{InitStatement}}
+                {{Indent}}{{InternalModifiers}} {{MemberType}} {{InternalExplicit}}{{Name}} { {{Get}} {{Set}} }{{InitStatement}}
                 """;
             }
         }
