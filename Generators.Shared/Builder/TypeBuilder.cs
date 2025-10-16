@@ -1,4 +1,5 @@
 ﻿using Generators.Models;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,6 +23,9 @@ internal abstract class MemberBuilder : TypeBuilder
     public string? Initialization { get; set; }
     public IList<string> Attributes { get; } = [];
     public bool IsGeneric { get; set; }
+    public bool IsOverride { get; set; }
+    protected string OverrideStr => IsOverride ? " override " : "";
+
     public IList<TypeParameterInfo> TypeArguments { get; set; } = [];
     protected string AttributeList => string.Join("\n", Attributes.Select(a => $"{Indent}[{a}]"));
     protected string Types

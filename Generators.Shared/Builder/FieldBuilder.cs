@@ -75,14 +75,14 @@ internal class PropertyBuilder : MemberBuilder<PropertyBuilder>
             {
                 return $$"""
                 {{AttributeList}}
-                {{Indent}}{{InternalModifiers}} {{MemberType}} {{InternalExplicit}}{{Name}} => {{Initialization}};
+                {{Indent}}{{InternalModifiers}} {{OverrideStr}}{{MemberType}} {{InternalExplicit}}{{Name}} => {{Initialization}};
                 """;
             }
             else
             {
                 return $$"""
                 {{AttributeList}}
-                {{Indent}}{{InternalModifiers}} {{MemberType}} {{InternalExplicit}}{{Name}} { {{Get}} {{Set}} }{{InitStatement}}
+                {{Indent}}{{InternalModifiers}} {{OverrideStr}}{{MemberType}} {{InternalExplicit}}{{Name}} { {{Get}} {{Set}} }{{InitStatement}}
                 """;
             }
         }

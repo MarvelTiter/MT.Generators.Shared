@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,20 +22,36 @@ internal class MethodBuilder : MethodBase<MethodBuilder>
     public string? ExplicitType { get; set; }
     string? InternalModifiers => IsExplicit ? "" : Modifiers;
     string? InternalExplicit => IsExplicit ? $"{ExplicitType}." : "";
+
+    //public static MethodBuilder From(IMethodSymbol method)
+    //{
+    //    //method.
+    //    var builder = new MethodBuilder();
+
+    //    builder.Name = method.Name;
+    //    builder.
+    //    builder.AddParameter([.. method.Parameters.Select(p => $"{p.Type.ToDisplayString()} {p.Name}")])
+    //        .Generic([.. method.GetTypeParameters()])
+    //        .Async(method.IsAsync);
+            
+
+    //    return builder;
+    //}
+
     public override string ToString()
     {
         if (IsLambdaBody)
             return
 $$"""
 {{AttributeList}}
-{{Indent}}{{InternalModifiers}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
+{{Indent}}{{InternalModifiers}}{{OverrideStr}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
 {{Indent}}  => {{Body.FirstOrDefault()?.ToString().Trim()}}
 """;
         else
             return
 $$"""
 {{AttributeList}}
-{{Indent}}{{InternalModifiers}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
+{{Indent}}{{InternalModifiers}}{{OverrideStr}}{{Async}}{{ReturnType}} {{InternalExplicit}}{{Name}}{{Types}}({{string.Join(", ", Parameters)}}){{TypeConstraints}}
 {{Indent}}{
 {{string.Join("\n", Body)}}
 {{Indent}}}
