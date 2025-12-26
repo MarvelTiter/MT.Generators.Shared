@@ -77,8 +77,8 @@ internal class ClassBuilder : MemberBuilder<ClassBuilder>
     {
         return
 $$"""
-{{AttributeList}}
 {{Indent}}/// <inheritdoc/>
+{{AttributeList}}
 {{Indent}}{{Modifiers}} {{ClassType}} {{Name}}{{Types}} {{BaseTypeList}}{{TypeConstraints}}
 {{Indent}}{
 {{string.Join("\n\n", RenderMembers())}}
