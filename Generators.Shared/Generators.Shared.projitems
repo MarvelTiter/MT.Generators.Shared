@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Statements\TryCatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TypeBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConstAttributes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)diagnostichelper\DiagnosticReflect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ClassBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompilationProviderExtensions.cs" />
@@ -39,5 +40,8 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
     <None Include="$(MSBuildThisFileDirectory)MT.Generators.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)DiagnosticHelper\" />
   </ItemGroup>
 </Project>
