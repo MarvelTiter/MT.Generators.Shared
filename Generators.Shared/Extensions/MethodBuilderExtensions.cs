@@ -4,16 +4,50 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Generators.Shared;
 
+internal static class E
+{
+    public static string ToCSharpKeyword(this Accessibility accessibility)
+    {
+        return accessibility switch
+        {
+            Accessibility.NotApplicable => "",
+            Accessibility.Private => "private",
+            Accessibility.ProtectedAndInternal => "private protected",
+            Accessibility.Protected => "protected",
+            Accessibility.Internal => "internal",
+            Accessibility.ProtectedOrInternal => "protected internal",
+            Accessibility.Public => "public",
+            _ => throw new NotSupportedException($"Accessibility '{accessibility}' is not supported in C#"),
+        };
+    }
+}
 internal static class MethodBuilderExtensions
 {
+    public static MethodBuilder Partial(this MethodBuilder builder, IMethodSymbol method)
+    {
+        var access = method.DeclaredAccessibility.ToCSharpKeyword();
+        var staticString = method.IsStatic ? " static " : " ";
+        string[] parameters = [
+                .. method.Parameters.Select((p, i) =>
+                    $"{(i == 0 && method.IsExtensionMethod ? "this " : "")}{p.Type.ToDisplayString()} {p.Name}")];
+        //method.Parameters();
+        return builder.MethodName(method.Name)
+            .Modifiers($"{access}{staticString}partial")
+            .AddParameter(parameters)
+            .ReturnType(method.ReturnType.ToDisplayString())
+            .Async(method.IsAsync);
+    }
+
     public static T MethodName<T>(this T builder, string name) where T : MethodBase
     {
         builder.Name = name;
         return builder;
     }
+
     public static T Generic<T>(this T builder, params TypeParameterInfo[] types) where T : MemberBuilder
     {
         if (types.Length > 0)
@@ -26,6 +60,7 @@ internal static class MethodBuilderExtensions
         }
         return builder;
     }
+
     public static MethodBuilder ReturnType(this MethodBuilder builder, string returnType)
     {
         builder.ReturnType = returnType;
@@ -235,7 +270,7 @@ internal static class MethodBuilderExtensions
         builder.AddBody(trycatch);
         return builder;
     }
-    
+
     public static TryCatch AddBody(this TryCatch tryCatch, params Statement[] statements)
     {
         foreach (var item in statements)
