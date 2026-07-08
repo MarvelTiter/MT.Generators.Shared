@@ -185,11 +185,14 @@ internal static class RoslynExtensions
     /// </summary>
     /// <param name="symbol"></param>
     /// <returns></returns>
-    public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol)
+    public static IEnumerable<IMethodSymbol> GetMethods(this INamedTypeSymbol? symbol, Func<IMethodSymbol, bool>? predicate = null)
     {
+        predicate ??= _ => true;
         foreach (var item in symbol?.GetMembers() ?? [])
         {
-            if (item.Kind == SymbolKind.Method && item is IMethodSymbol method)
+            if (item.Kind == SymbolKind.Method
+                && item is IMethodSymbol method
+                && predicate(method))
             {
                 yield return method;
             }
@@ -304,6 +307,42 @@ internal static class RoslynExtensions
         }
     }
 
+    public static IEnumerable<TReturn> GetAllMembers<TReturn>(this INamespaceSymbol namespaceSymbol
+    , Func<ISymbol, bool> predicate)
+    where TReturn : ISymbol
+    {
+        foreach (var item in InternalGetAllSymbols(namespaceSymbol))
+        {
+            if (predicate(item) && item is TReturn t)
+            {
+                yield return t;
+            }
+        }
+
+        static IEnumerable<ISymbol> InternalGetAllSymbols(INamespaceSymbol global)
+        {
+            foreach (var symbol in global.GetMembers())
+            {
+                if (symbol is INamespaceSymbol n)
+                {
+                    foreach (var item in InternalGetAllSymbols(n))
+                    {
+                        //if (item.HasAttribute(AutoInject))
+                        yield return item;
+                    }
+                }
+                else if (symbol is INamedTypeSymbol t)
+                {
+                    yield return symbol;
+                    foreach (var item in t.GetMembers())
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+    }
+
     public static Location? TryGetLocation(this ISymbol symbol)
     {
         var syntaxReference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
@@ -356,6 +395,20 @@ internal static class RoslynExtensions
         }
         var np = symbol.ContainingNamespace.ToDisplayString().Replace('.', '_');
         return $"{np}_{meta}";
+    }
+
+    public static string SafeMetaName(this ISymbol symbol)
+    {
+        var meta = symbol.MetadataName;
+        if (meta.IndexOf('`') > -1)
+        {
+            meta = meta.Substring(0, meta.IndexOf('`'));
+        }
+        if (meta.Contains("."))
+        {
+            meta = meta.Replace(".", "_");
+        }
+        return meta;
     }
 
     public static IEnumerable<(IMethodSymbol Symbol, AttributeData? AttrData)> GetAllMethodWithAttribute(this INamedTypeSymbol interfaceSymbol, string fullName, INamedTypeSymbol? classSymbol = null)
