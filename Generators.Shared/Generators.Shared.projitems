@@ -36,6 +36,26 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TypeParameterInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RoslynExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\ClassBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\CodeFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\ConstructorBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\FieldBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\MethodBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AttributeInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\NamespaceBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Node.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\SyntaxKit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\ForeachStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\IfStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\LocalFunction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\Statement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\SwitchStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Statements\TryCatch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Extensions\ClassBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Extensions\MethodBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Extensions\NameSpaceBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Extensions\PropertyBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SyntaxBuilder\Extensions\TypeBuilderExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />

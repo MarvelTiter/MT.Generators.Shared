@@ -282,6 +282,46 @@ internal static class RoslynExtensions
         return usings.Select(a => a.ToFullString().Replace("\n", "")).ToArray();
     }
 
+    public static List<UsingDirectiveSyntax> GetTargetUsingSyntaxs(this ISymbol symbol)
+    {
+        List<UsingDirectiveSyntax> usings = [];
+        foreach (var item in symbol.DeclaringSyntaxReferences)
+        {
+            var syntax = item.GetSyntax();
+            if (syntax is
+                {
+                    Parent: NamespaceDeclarationSyntax
+                    {
+                        Usings: var nu1,
+                        Parent: CompilationUnitSyntax
+                        {
+                            Usings: var cnu1
+                        }
+                    }
+                })
+            {
+                usings.AddRange(nu1);
+                usings.AddRange(cnu1);
+            }
+            else if (syntax is
+            {
+                Parent: FileScopedNamespaceDeclarationSyntax
+                {
+                    Usings: var nu2,
+                    Parent: CompilationUnitSyntax
+                    {
+                        Usings: var cnu2
+                    }
+                }
+            })
+            {
+                usings.AddRange(nu2);
+                usings.AddRange(cnu2);
+            }
+        }
+        return usings;
+    }
+
     public static IEnumerable<INamedTypeSymbol> GetAllSymbols(this Compilation compilation, string fullName, bool isInherited = false)
     {
         return InternalGetAllSymbols(compilation.GlobalNamespace, fullName, isInherited);
